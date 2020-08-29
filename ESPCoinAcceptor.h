@@ -12,7 +12,7 @@ private:
     int coinPin;
     void process();
 public:
-    ESPCoinAcceptor(int pin = DEFAULT_COIN_PIN);
+    ESPCoinAcceptor(int pin);
     void begin();
     void loop();
     bool isCoinInserted();
