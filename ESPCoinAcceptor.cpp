@@ -3,10 +3,11 @@
 volatile uint32_t coinCredit = 0;
 volatile uint32_t previousCoinCredit = 0;
 uint32_t lastCreditChangeTime = 0;
+int globalIRQPin = 0;
 
 ICACHE_RAM_ATTR void attendCoinPulse();
 
-ESPCoinAcceptor::ESPCoinAcceptor(int pin = DEFAULT_COIN_PIN)
+ESPCoinAcceptor::ESPCoinAcceptor(int pin)
 {
     coinPin = pin;
     coinInserted = false;
@@ -32,8 +33,9 @@ void ESPCoinAcceptor::begin()
 *It's recommended to configure the COIN as NO to reduce power consumption through the pull-up when idle.
 *In NO, we trigger the interrupt on falling-edge.
 */
-  pinMode(interruptPin, INPUT_PULLUP);
-  attachInterrupt(digitalPinToInterrupt(coinPin), attendCoinPulse, FALLING);
+  globalIRQPin = coinPin;
+  pinMode(globalIRQPin, INPUT_PULLUP);
+  attachInterrupt(digitalPinToInterrupt(globalIRQPin), attendCoinPulse, FALLING);
 }
 
 void ESPCoinAcceptor::loop()
@@ -53,7 +55,7 @@ void attendCoinPulse()
 {
   // Make sure this is a real pulse and not a spurious glitch
   delay(1);
-  if(digitalRead(coinPin) == LOW) 
+  if(digitalRead(globalIRQPin) == LOW) 
   {
     coinCredit += 1;
     lastCreditChangeTime = millis();
